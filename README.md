@@ -1,10 +1,10 @@
 # Traybin
 
-**Double-click** the tray icon to clear the recycle bin.
+**Double-click** on the tray icon to clear the recycle bin.
 
-**Right-click** the tray icon to open the recycle bin in File Explorer.
+**Right-click** on the tray icon to open the recycle bin in File Explorer.
 
-**Shift + Right-click** the tray icon to exit the application and remove it from startup.
+**Shift + Right-click** on the tray icon to exit the application and remove it from startup.
 
 ---
 
