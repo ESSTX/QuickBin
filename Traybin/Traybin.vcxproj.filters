@@ -30,13 +30,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="bin_full.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="bin_empty.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icon3.ico">
+    <Image Include="bin_full.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="main.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
