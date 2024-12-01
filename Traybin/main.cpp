@@ -260,7 +260,7 @@ int WINAPI wWinMain(_In_ HINSTANCE instanceHandle,
     RegisterClass(&windowClass);
 
     const HWND windowHandle = CreateWindowEx(
-        0, L"Traybin", L"Traybin app", WS_OVERLAPPEDWINDOW,
+        0, L"Traybin", L"Traybin application", WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         nullptr, nullptr, instanceHandle, nullptr);
 
