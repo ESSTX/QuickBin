@@ -8,7 +8,7 @@
 #include "resource.h"
 
 constexpr const wchar_t *AUTOSTART_KEY = L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-constexpr const wchar_t *APP_NAME = L"Traybin";
+constexpr const wchar_t *APP_NAME = L"QuickBin";
 
 static UINT WM_TASKBARCREATED = 0;
 
@@ -255,12 +255,12 @@ int WINAPI wWinMain(_In_ HINSTANCE instanceHandle,
     WNDCLASS windowClass = {};
     windowClass.lpfnWndProc = WindowProc;
     windowClass.hInstance = instanceHandle;
-    windowClass.lpszClassName = L"Traybin";
+    windowClass.lpszClassName = L"QuickBin";
 
     RegisterClass(&windowClass);
 
     const HWND windowHandle = CreateWindowEx(
-        0, L"Traybin", L"Traybin application", WS_OVERLAPPEDWINDOW,
+        0, L"QuickBin", L"QuickBin app", WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         nullptr, nullptr, instanceHandle, nullptr);
 
