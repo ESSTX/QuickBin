@@ -10,6 +10,8 @@
 constexpr const wchar_t *AUTOSTART_KEY = L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 constexpr const wchar_t *APP_NAME = L"Traybin";
 
+static UINT WM_TASKBARCREATED = 0;
+
 bool IsAutoStartEnabled()
 {
     HKEY hKey;
@@ -67,7 +69,8 @@ public:
 
     [[nodiscard]] bool isEmpty() override
     {
-        SHQUERYRBINFO recycleBinInfo{.cbSize = sizeof(SHQUERYRBINFO)};
+        SHQUERYRBINFO recycleBinInfo = {};
+        recycleBinInfo.cbSize = sizeof(SHQUERYRBINFO);
         if (const HRESULT result = SHQueryRecycleBinW(nullptr, &recycleBinInfo); result != S_OK)
         {
             std::cerr << "Error querying recycle bin state." << std::endl;
@@ -101,12 +104,22 @@ public:
         notifyIconData.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
         notifyIconData.uCallbackMessage = WM_APP;
         updateTrayIcon(true);
+        addTrayIcon();
+    }
+
+    void addTrayIcon()
+    {
         Shell_NotifyIcon(NIM_ADD, &notifyIconData);
+    }
+
+    void removeTrayIcon()
+    {
+        Shell_NotifyIcon(NIM_DELETE, &notifyIconData);
     }
 
     ~WindowsNotificationSystem() override
     {
-        Shell_NotifyIcon(NIM_DELETE, &notifyIconData);
+        removeTrayIcon();
     }
 
     void showNotification(const std::wstring &title, const std::wstring &message) override
@@ -125,6 +138,7 @@ public:
         const wchar_t *tooltipText = isEmpty ? L"Recycle Bin is empty" : L"Recycle Bin contains items";
         wcscpy_s(notifyIconData.szTip, tooltipText);
         Shell_NotifyIcon(NIM_MODIFY, &notifyIconData);
+        addTrayIcon();
     }
 
 private:
@@ -168,6 +182,15 @@ private:
 LRESULT CALLBACK WindowProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static RecycleBinManager *recycleBinManager = nullptr;
+
+    if (message == WM_TASKBARCREATED)
+    {
+        if (recycleBinManager)
+        {
+            recycleBinManager->updateIcon();
+            return 0;
+        }
+    }
 
     switch (message)
     {
@@ -220,6 +243,8 @@ int WINAPI wWinMain(_In_ HINSTANCE instanceHandle,
                     _In_ LPWSTR commandLine,
                     _In_ int showCommand)
 {
+    WM_TASKBARCREATED = RegisterWindowMessageW(L"TaskbarCreated");
+
     if (!IsAutoStartEnabled())
     {
         SetAutoStart();
@@ -227,10 +252,10 @@ int WINAPI wWinMain(_In_ HINSTANCE instanceHandle,
 
     ShowWindow(GetConsoleWindow(), SW_HIDE);
 
-    WNDCLASS windowClass{
-        .lpfnWndProc = WindowProc,
-        .hInstance = instanceHandle,
-        .lpszClassName = L"Traybin"};
+    WNDCLASS windowClass = {};
+    windowClass.lpfnWndProc = WindowProc;
+    windowClass.hInstance = instanceHandle;
+    windowClass.lpszClassName = L"Traybin";
 
     RegisterClass(&windowClass);
 
@@ -242,12 +267,13 @@ int WINAPI wWinMain(_In_ HINSTANCE instanceHandle,
     ShowWindow(windowHandle, SW_HIDE);
 
     std::atomic<bool> isRunning{true};
-    std::jthread updateThread([windowHandle, &isRunning]
-                              {
+    std::thread updateThread([windowHandle, &isRunning]
+                             {
         while (isRunning) {
             SendMessage(windowHandle, WM_APP + 1, 0, 0);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         } });
+    updateThread.detach();
 
     MSG message{};
     while (GetMessage(&message, nullptr, 0, 0))
