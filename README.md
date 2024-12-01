@@ -1,4 +1,4 @@
-# Traybin
+# QuickBin
 
 *A simple tool for cleaning the recycle bin, which is located in the system tray.*
 
